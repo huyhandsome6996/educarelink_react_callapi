@@ -1,0 +1,132 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "java",
+            "name": "lab7_bai9",
+            "request": "launch",
+            "mainClass": "lab7_bai9",
+            "projectName": "javathaythanh_579791b8"
+        },
+        {
+            "type": "java",
+            "name": "lap5_bai1",
+            "request": "launch",
+            "mainClass": "lap5_bai1",
+            "projectName": "javathaythanh_579791b8"
+        },
+        {
+            "type": "java",
+            "name": "lap3_bai8",
+            "request": "launch",
+            "mainClass": "lap3_bai8",
+            "projectName": "javathaythanh_579791b8"
+        },
+        {
+            "type": "java",
+            "name": "lap3_bai6",
+            "request": "launch",
+            "mainClass": "lap3_bai6",
+            "projectName": "javathaythanh_579791b8"
+        },
+        {
+            "type": "java",
+            "name": "lap3_bai4",
+            "request": "launch",
+            "mainClass": "lap3_bai4",
+            "projectName": "javathaythanh_579791b8"
+        },
+        {
+            "type": "java",
+            "name": "lap3_bai3",
+            "request": "launch",
+            "mainClass": "lap3_bai3",
+            "projectName": "javathaythanh_579791b8"
+        },
+        {
+            "type": "java",
+            "name": "lap3_bai2",
+            "request": "launch",
+            "mainClass": "lap3_bai2",
+            "projectName": "javathaythanh_579791b8"
+        },
+        {
+            "type": "java",
+            "name": "lap3_bai1",
+            "request": "launch",
+            "mainClass": "lap3_bai1",
+            "projectName": "javathaythanh_579791b8"
+        },
+        {
+            "type": "java",
+            "name": "lap2_bai2_6",
+            "request": "launch",
+            "mainClass": "lap2_bai2_6",
+            "projectName": "javathaythanh_579791b8"
+        },
+        {
+            "type": "java",
+            "name": "lap2_bai2_5",
+            "request": "launch",
+            "mainClass": "lap2_bai2_5",
+            "projectName": "javathaythanh_579791b8"
+        },
+        {
+            "type": "java",
+            "name": "lap2_bai2_4",
+            "request": "launch",
+            "mainClass": "lap2_bai2_4",
+            "projectName": "javathaythanh_579791b8"
+        },
+        {
+            "type": "java",
+            "name": "lap2_bai2_3",
+            "request": "launch",
+            "mainClass": "lap2_bai2_3",
+            "projectName": "javathaythanh_579791b8"
+        },
+        {
+            "type": "java",
+            "name": "lap2_bai2_2",
+            "request": "launch",
+            "mainClass": "lap2_bai2_2",
+            "projectName": "javathaythanh_579791b8"
+        },
+        {
+            "type": "java",
+            "name": "lap2_bai2_1",
+            "request": "launch",
+            "mainClass": "lap2_bai2_1",
+            "projectName": "javathaythanh_579791b8"
+        },
+        {
+            "type": "java",
+            "name": "lap1",
+            "request": "launch",
+            "mainClass": "lap1",
+            "projectName": "javathaythanh_579791b8"
+        },
+        {
+            "type": "java",
+            "name": "bai2_lab2",
+            "request": "launch",
+            "mainClass": "bai2_lab2",
+            "projectName": "javathaythanh_579791b8"
+        },
+        {
+            "type": "java",
+            "name": "bai1",
+            "request": "launch",
+            "mainClass": "bai1",
+            "projectName": "javathaythanh_579791b8"
+        },
+        {
+            "type": "jdk",
+            "request": "launch",
+            "name": "Launch Java App"
+        }
+    ]
+}

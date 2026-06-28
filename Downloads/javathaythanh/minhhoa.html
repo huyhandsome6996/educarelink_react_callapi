@@ -1,0 +1,1641 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sắp xếp Trộn (Merge Sort) - Danh sách liên kết đôi</title>
+<style>
+  :root {
+    --primary: #1a237e;
+    --primary-light: #3949ab;
+    --primary-dark: #0d1642;
+    --divide: #e53935;
+    --divide-light: #ff5f52;
+    --merge: #43a047;
+    --merge-light: #76d275;
+    --current: #f57c00;
+    --current-light: #ffb04c;
+    --bg: #f5f7ff;
+    --card-bg: #ffffff;
+    --text: #1a1a2e;
+    --text-light: #5c5c7a;
+    --border: #d0d5f0;
+    --code-bg: #1e1e2e;
+    --code-text: #cdd6f4;
+    --code-keyword: #cba6f7;
+    --code-string: #a6e3a1;
+    --code-comment: #6c7086;
+    --code-function: #89b4fa;
+    --code-number: #fab387;
+    --code-param: #f9e2af;
+    --code-operator: #89dceb;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.7;
+  }
+
+  /* NAV BAR */
+  .navbar {
+    background: linear-gradient(135deg, var(--primary-dark), var(--primary));
+    color: #fff;
+    padding: 0.75rem 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    box-shadow: 0 2px 12px rgba(26,35,126,0.3);
+  }
+  .navbar a {
+    color: #fff;
+    text-decoration: none;
+    font-size: 0.95rem;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.4rem 0.8rem;
+    border-radius: 6px;
+    transition: background 0.2s;
+  }
+  .navbar a:hover { background: rgba(255,255,255,0.15); }
+  .navbar .title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    flex: 1;
+    text-align: center;
+    letter-spacing: 0.5px;
+  }
+
+  /* MAIN */
+  .container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 1.5rem 1rem 3rem;
+  }
+
+  /* CARDS */
+  .card {
+    background: var(--card-bg);
+    border-radius: 14px;
+    border: 1px solid var(--border);
+    box-shadow: 0 2px 16px rgba(26,35,126,0.06);
+    padding: 1.8rem;
+    margin-bottom: 1.8rem;
+    transition: box-shadow 0.3s;
+  }
+  .card:hover { box-shadow: 0 4px 24px rgba(26,35,126,0.12); }
+
+  .card h2 {
+    font-size: 1.35rem;
+    color: var(--primary);
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    border-bottom: 2px solid var(--border);
+    padding-bottom: 0.6rem;
+  }
+  .card h3 {
+    font-size: 1.1rem;
+    color: var(--primary-light);
+    margin: 1rem 0 0.5rem;
+  }
+  .card p, .card li { color: var(--text); font-size: 0.97rem; }
+  .card ul { padding-left: 1.3rem; }
+  .card li { margin-bottom: 0.35rem; }
+
+  /* BADGE */
+  .badge {
+    display: inline-block;
+    padding: 0.15rem 0.6rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    vertical-align: middle;
+  }
+  .badge-divide { background: rgba(229,57,53,0.12); color: var(--divide); }
+  .badge-merge { background: rgba(67,160,71,0.12); color: var(--merge); }
+  .badge-current { background: rgba(245,124,0,0.12); color: var(--current); }
+  .badge-primary { background: rgba(26,35,126,0.1); color: var(--primary); }
+
+  /* CONCEPT STEPS */
+  .concept-steps {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1rem;
+    margin-top: 1rem;
+  }
+  .concept-step {
+    background: linear-gradient(135deg, rgba(26,35,126,0.04), rgba(26,35,126,0.08));
+    border-radius: 12px;
+    padding: 1.2rem;
+    text-align: center;
+    border: 1px solid rgba(26,35,126,0.1);
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .concept-step:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(26,35,126,0.12);
+  }
+  .concept-step .step-num {
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    background: var(--primary);
+    color: #fff;
+    font-weight: 700;
+    font-size: 1.1rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 0.6rem;
+  }
+  .concept-step h4 { color: var(--primary); margin-bottom: 0.4rem; }
+  .concept-step p { font-size: 0.88rem; color: var(--text-light); }
+
+  /* VISUALIZATION AREA */
+  .viz-area {
+    background: linear-gradient(135deg, #fafbff, #f0f2ff);
+    border-radius: 12px;
+    border: 2px solid var(--border);
+    min-height: 280px;
+    padding: 1.5rem;
+    position: relative;
+    overflow-x: auto;
+  }
+
+  /* NODES */
+  .node-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: nowrap;
+    gap: 0;
+    margin: 0.5rem 0;
+    min-height: 60px;
+  }
+  .node-box {
+    min-width: 90px;
+    padding: 0.5rem 0.7rem;
+    border-radius: 10px;
+    text-align: center;
+    font-weight: 600;
+    font-size: 0.88rem;
+    position: relative;
+    border: 2px solid transparent;
+    transition: all 0.4s ease;
+    white-space: nowrap;
+  }
+  .node-box .node-label {
+    font-size: 0.72rem;
+    font-weight: 400;
+    opacity: 0.7;
+    display: block;
+    margin-top: 2px;
+  }
+  .node-default {
+    background: #e8eaf6;
+    color: var(--primary);
+    border-color: #c5cae9;
+  }
+  .node-active {
+    background: var(--current-light);
+    color: #fff;
+    border-color: var(--current);
+    transform: scale(1.08);
+    box-shadow: 0 0 12px rgba(245,124,0,0.4);
+  }
+  .node-slow {
+    background: #bbdefb;
+    color: var(--primary-dark);
+    border-color: #64b5f6;
+  }
+  .node-fast {
+    background: #c8e6c9;
+    color: #1b5e20;
+    border-color: #66bb6a;
+  }
+  .node-compare {
+    background: #fff9c4;
+    color: #f57f17;
+    border-color: #fdd835;
+    transform: scale(1.05);
+    box-shadow: 0 0 10px rgba(253,216,53,0.5);
+  }
+  .node-selected {
+    background: var(--merge-light);
+    color: #1b5e20;
+    border-color: var(--merge);
+  }
+  .node-divided {
+    background: #ffcdd2;
+    color: #b71c1c;
+    border-color: var(--divide);
+  }
+  .node-sorted {
+    background: var(--merge);
+    color: #fff;
+    border-color: var(--merge);
+  }
+
+  /* ARROWS */
+  .arrow-h {
+    font-size: 1.3rem;
+    color: #9e9e9e;
+    margin: 0 0.15rem;
+    user-select: none;
+  }
+  .arrow-h.active-arrow { color: var(--current); font-weight: 700; }
+
+  /* POINTER LABELS */
+  .pointer-label {
+    position: absolute;
+    top: -22px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 0.72rem;
+    font-weight: 700;
+    white-space: nowrap;
+    padding: 1px 6px;
+    border-radius: 4px;
+  }
+  .pointer-slow { background: #64b5f6; color: #fff; }
+  .pointer-fast { background: #66bb6a; color: #fff; }
+  .pointer-current { background: var(--current); color: #fff; }
+
+  /* CONTROLS */
+  .controls {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    flex-wrap: wrap;
+    margin-top: 1rem;
+  }
+  .btn {
+    padding: 0.55rem 1.2rem;
+    border-radius: 8px;
+    border: none;
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+  .btn:active { transform: scale(0.96); }
+  .btn-primary {
+    background: var(--primary);
+    color: #fff;
+  }
+  .btn-primary:hover { background: var(--primary-light); }
+  .btn-primary:disabled { background: #9fa8da; cursor: not-allowed; }
+  .btn-divide {
+    background: var(--divide);
+    color: #fff;
+  }
+  .btn-divide:hover { background: var(--divide-light); }
+  .btn-merge {
+    background: var(--merge);
+    color: #fff;
+  }
+  .btn-merge:hover { background: var(--merge-light); }
+  .btn-outline {
+    background: transparent;
+    color: var(--primary);
+    border: 2px solid var(--primary);
+  }
+  .btn-outline:hover { background: rgba(26,35,126,0.06); }
+  .btn-current {
+    background: var(--current);
+    color: #fff;
+  }
+  .btn-current:hover { background: var(--current-light); }
+
+  /* STEP INFO */
+  .step-info {
+    background: linear-gradient(135deg, #fff8e1, #fff3e0);
+    border-left: 4px solid var(--current);
+    padding: 0.8rem 1rem;
+    border-radius: 0 8px 8px 0;
+    margin-top: 1rem;
+    font-size: 0.92rem;
+    line-height: 1.6;
+  }
+  .step-info strong { color: var(--current); }
+
+  /* PROGRESS BAR */
+  .progress-wrap {
+    margin-top: 0.8rem;
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+  }
+  .progress-bar {
+    flex: 1;
+    height: 8px;
+    background: #e0e0e0;
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--primary), var(--current));
+    border-radius: 4px;
+    transition: width 0.4s ease;
+  }
+  .progress-text { font-size: 0.82rem; color: var(--text-light); font-weight: 600; white-space: nowrap; }
+
+  /* PHASE TABS */
+  .phase-tabs {
+    display: flex;
+    gap: 0;
+    margin-bottom: 1rem;
+    border-radius: 10px;
+    overflow: hidden;
+    border: 2px solid var(--border);
+  }
+  .phase-tab {
+    flex: 1;
+    padding: 0.6rem;
+    text-align: center;
+    font-weight: 600;
+    font-size: 0.88rem;
+    cursor: pointer;
+    background: #e8eaf6;
+    color: var(--text-light);
+    border: none;
+    transition: all 0.3s;
+  }
+  .phase-tab.active-divide { background: var(--divide); color: #fff; }
+  .phase-tab.active-merge { background: var(--merge); color: #fff; }
+  .phase-tab.active-current { background: var(--current); color: #fff; }
+
+  /* SPLIT VISUAL */
+  .split-row {
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 2rem;
+    flex-wrap: wrap;
+    margin: 0.8rem 0;
+  }
+  .split-col {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.3rem;
+  }
+  .split-label {
+    font-size: 0.78rem;
+    font-weight: 700;
+    padding: 0.2rem 0.7rem;
+    border-radius: 12px;
+    margin-bottom: 0.3rem;
+  }
+
+  /* RECURSION TREE */
+  .rec-tree {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.3rem;
+    margin: 1rem 0;
+  }
+  .rec-level {
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+  .rec-group {
+    display: flex;
+    align-items: center;
+    gap: 0.1rem;
+    padding: 0.3rem 0.5rem;
+    background: #e8eaf6;
+    border-radius: 8px;
+    border: 1px solid #c5cae9;
+    font-size: 0.82rem;
+    font-weight: 600;
+    transition: all 0.3s;
+  }
+  .rec-group.highlight {
+    background: #fff9c4;
+    border-color: #fdd835;
+    box-shadow: 0 0 8px rgba(253,216,53,0.4);
+  }
+  .rec-level-label {
+    font-size: 0.75rem;
+    color: var(--text-light);
+    min-width: 80px;
+    text-align: right;
+    padding-right: 0.5rem;
+  }
+  .rec-level-row {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+  .rec-arrow-down {
+    font-size: 1rem;
+    color: var(--primary-light);
+  }
+
+  /* CODE BLOCK */
+  .code-block {
+    background: var(--code-bg);
+    border-radius: 12px;
+    padding: 1.2rem;
+    overflow-x: auto;
+    margin: 0.8rem 0;
+    font-family: 'Fira Code', 'Cascadia Code', 'Consolas', monospace;
+    font-size: 0.85rem;
+    line-height: 1.7;
+    color: var(--code-text);
+    position: relative;
+  }
+  .code-block .code-label {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.8rem;
+    font-size: 0.7rem;
+    color: var(--code-comment);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  .kw { color: var(--code-keyword); }
+  .fn { color: var(--code-function); }
+  .st { color: var(--code-string); }
+  .cm { color: var(--code-comment); font-style: italic; }
+  .nm { color: var(--code-number); }
+  .pm { color: var(--code-param); }
+  .op { color: var(--code-operator); }
+  .hl-line {
+    background: rgba(245,124,0,0.15);
+    display: block;
+    margin: 0 -1.2rem;
+    padding: 0 1.2rem;
+    border-left: 3px solid var(--current);
+  }
+
+  /* COMPLEXITY TABLE */
+  .complexity-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+    font-size: 0.9rem;
+  }
+  .complexity-table th {
+    background: var(--primary);
+    color: #fff;
+    padding: 0.6rem 0.8rem;
+    text-align: center;
+    font-weight: 600;
+  }
+  .complexity-table td {
+    padding: 0.5rem 0.8rem;
+    text-align: center;
+    border-bottom: 1px solid var(--border);
+  }
+  .complexity-table tr:nth-child(even) td { background: #f5f7ff; }
+  .complexity-table .highlight-row td { background: #fff8e1; font-weight: 600; }
+
+  /* FAST/SLOW MINI VIZ */
+  .miniviz {
+    background: #fafbff;
+    border: 2px solid #c5cae9;
+    border-radius: 12px;
+    padding: 1.2rem;
+    margin: 1rem 0;
+    position: relative;
+  }
+  .miniviz h4 { color: var(--primary); margin-bottom: 0.7rem; }
+  .pointer-icons {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    margin: 0.5rem 0;
+  }
+  .ptr-icon {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.3rem 0.7rem;
+    border-radius: 20px;
+    font-size: 0.88rem;
+    font-weight: 600;
+  }
+  .ptr-slow { background: #bbdefb; color: var(--primary-dark); }
+  .ptr-fast { background: #c8e6c9; color: #1b5e20; }
+
+  /* MERGE DETAIL */
+  .merge-detail {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    gap: 1rem;
+    align-items: start;
+    margin: 1rem 0;
+  }
+  .merge-list {
+    background: #f5f7ff;
+    border-radius: 10px;
+    padding: 0.8rem;
+    border: 1px solid var(--border);
+  }
+  .merge-list h5 {
+    font-size: 0.82rem;
+    color: var(--text-light);
+    margin-bottom: 0.5rem;
+  }
+  .merge-result {
+    background: #e8f5e9;
+    border-radius: 10px;
+    padding: 0.8rem;
+    border: 2px solid var(--merge);
+  }
+  .merge-result h5 {
+    font-size: 0.82rem;
+    color: var(--merge);
+    margin-bottom: 0.5rem;
+  }
+  .merge-compare-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    color: var(--current);
+    padding-top: 1.5rem;
+  }
+
+  /* TOOLTIP */
+  .info-tip {
+    display: inline-block;
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    background: var(--primary-light);
+    color: #fff;
+    font-size: 0.7rem;
+    text-align: center;
+    line-height: 18px;
+    cursor: help;
+    vertical-align: middle;
+    margin-left: 0.3rem;
+  }
+
+  /* RESPONSIVE */
+  @media (max-width: 768px) {
+    .container { padding: 1rem 0.6rem 2rem; }
+    .card { padding: 1.2rem; }
+    .card h2 { font-size: 1.15rem; }
+    .concept-steps { grid-template-columns: 1fr; }
+    .node-box { min-width: 70px; font-size: 0.78rem; padding: 0.4rem 0.5rem; }
+    .arrow-h { font-size: 1rem; }
+    .merge-detail { grid-template-columns: 1fr; }
+    .split-row { gap: 1rem; }
+    .controls { justify-content: center; }
+    .navbar .title { font-size: 0.9rem; }
+  }
+
+  /* SCROLLBAR */
+  .viz-area::-webkit-scrollbar { height: 6px; }
+  .viz-area::-webkit-scrollbar-track { background: #e0e0e0; border-radius: 3px; }
+  .viz-area::-webkit-scrollbar-thumb { background: var(--primary-light); border-radius: 3px; }
+
+  /* ANIMATION */
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .fade-in { animation: fadeInUp 0.4s ease; }
+
+  @keyframes pulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(245,124,0,0.4); }
+    50% { box-shadow: 0 0 12px 4px rgba(245,124,0,0.25); }
+  }
+  .pulse { animation: pulse 1.2s infinite; }
+
+  @keyframes slideSplit {
+    from { opacity: 0.5; transform: scaleX(0.9); }
+    to { opacity: 1; transform: scaleX(1); }
+  }
+  .slide-split { animation: slideSplit 0.4s ease; }
+</style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar">
+  <a href="index.html">&#8592; Trang chủ</a>
+  <span class="title">Sắp xếp Trộn (Merge Sort) &mdash; Danh sách liên kết đôi</span>
+</nav>
+
+<div class="container">
+
+<!-- ===================== A) CONCEPT ===================== -->
+<section class="card">
+  <h2><span>&#128218;</span> Khái niệm Sắp xếp Trộn (Merge Sort)</h2>
+  <p>
+    <strong>Merge Sort</strong> (Sắp xếp trộn) là thuật toán sắp xếp sử dụng chiến lược
+    <strong>Chia để trị (Divide and Conquer)</strong>. Thuật toán hoạt động bằng cách:
+  </p>
+  <div class="concept-steps">
+    <div class="concept-step">
+      <div class="step-num">1</div>
+      <h4>Chia đôi</h4>
+      <p>Chia danh sách thành hai nửa bằng nhau</p>
+      <span class="badge badge-divide">CHIA</span>
+    </div>
+    <div class="concept-step">
+      <div class="step-num">2</div>
+      <h4>Sắp xếp đệ quy</h4>
+      <p>Gọi đệ quy sắp xếp từng nửa độc lập</p>
+      <span class="badge badge-current">ĐỆ QUY</span>
+    </div>
+    <div class="concept-step">
+      <div class="step-num">3</div>
+      <h4>Trộn hai nửa</h4>
+      <p>Hợp nhất hai nửa đã sắp xếp thành một</p>
+      <span class="badge badge-merge">TRỘN</span>
+    </div>
+  </div>
+
+  <h3>&#9889; Tại sao Merge Sort phù hợp với Linked List?</h3>
+  <ul>
+    <li><strong>Không cần mảng phụ:</strong> Chỉ thao tác trên con trỏ, không cần cấp phát mảng mới!</li>
+    <li><strong>Space O(1):</strong> Trên Linked List, Merge Sort chỉ cần thay đổi con trỏ &rarr; bộ nhớ thêm là O(1)</li>
+    <li><strong>Stable sort:</strong> Giữ nguyên thứ tự các phần tử bằng nhau &rarr; quan trọng cho sắp xếp đa tiêu chí</li>
+    <li><strong>Chia đôi dễ dàng:</strong> Kỹ thuật con trỏ nhanh/chậm tìm giữa trong O(n) mà không cần biết độ dài trước</li>
+  </ul>
+
+  <h3>&#128202; Độ phức tạp</h3>
+  <table class="complexity-table">
+    <tr><th>Trường hợp</th><th>Thời gian</th><th>Không gian</th></tr>
+    <tr><td>Tốt nhất</td><td>O(n log n)</td><td>O(1)</td></tr>
+    <tr><td>Trung bình</td><td>O(n log n)</td><td>O(1)</td></tr>
+    <tr><td>Xấu nhất</td><td>O(n log n)</td><td>O(1)</td></tr>
+    <tr class="highlight-row"><td><strong>Ưu điểm</strong></td><td colspan="2">Luôn O(n log n), Stable, không cần mảng phụ trên Linked List</td></tr>
+  </table>
+</section>
+
+<!-- ===================== B) INTERACTIVE VIZ ===================== -->
+<section class="card">
+  <h2><span>&#127912;</span> Trực quan hóa từng bước</h2>
+
+  <!-- Phase tabs -->
+  <div class="phase-tabs">
+    <button class="phase-tab active-divide" id="tabDivide" onclick="showPhase('divide')">1 &bull; CHIA</button>
+    <button class="phase-tab" id="tabRecur" onclick="showPhase('recur')">2 &bull; ĐỆ QUY</button>
+    <button class="phase-tab" id="tabMerge" onclick="showPhase('merge')">3 &bull; TRỘN</button>
+  </div>
+
+  <!-- Main viz area -->
+  <div class="viz-area" id="vizArea">
+    <!-- Populated by JS -->
+  </div>
+
+  <!-- Controls -->
+  <div class="controls">
+    <button class="btn btn-primary" id="btnNext" onclick="nextStep()">&#9654; Bước tiếp</button>
+    <button class="btn btn-current" id="btnAuto" onclick="toggleAuto()">&#9654; Tự động</button>
+    <button class="btn btn-outline" id="btnReset" onclick="resetViz()">&#8634; Làm lại</button>
+    <span id="stepCounter" style="font-size:0.88rem;color:var(--text-light);font-weight:600;">Bước 0 / 0</span>
+  </div>
+
+  <!-- Progress bar -->
+  <div class="progress-wrap">
+    <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+    <span class="progress-text" id="progressText">0%</span>
+  </div>
+
+  <!-- Step info -->
+  <div class="step-info" id="stepInfo">
+    Nhấn <strong>&#9654; Bước tiếp</strong> để bắt đầu trực quan hóa.
+  </div>
+</section>
+
+<!-- ===================== C) FAST/SLOW POINTER ===================== -->
+<section class="card">
+  <h2><span>&#128036;&#128007;</span> Kỹ thuật Con trỏ Nhanh/Chậm (Fast/Slow Pointer)</h2>
+  <p>
+    Để <strong>chia đôi</strong> danh sách liên kết mà <em>không cần đếm số phần tử trước</em>, ta dùng hai con trỏ:
+  </p>
+  <ul>
+    <li><strong>Con trỏ chậm &#128036; (slow):</strong> Di chuyển <strong>1 bước</strong> mỗi lần lặp</li>
+    <li><strong>Con trỏ nhanh &#128007; (fast):</strong> Di chuyển <strong>2 bước</strong> mỗi lần lặp</li>
+    <li>Khi con trỏ nhanh đến cuối danh sách &rarr; con trỏ chậm đang ở <strong>vị trí giữa</strong>!</li>
+  </ul>
+
+  <div class="miniviz">
+    <h4>&#127912; Minh họa tìm giữa danh sách</h4>
+    <div class="pointer-icons">
+      <span class="ptr-icon ptr-slow">&#128036; con_tro_cham (1 bước)</span>
+      <span class="ptr-icon ptr-fast">&#128007; con_tro_nhanh (2 bước)</span>
+    </div>
+    <div id="slowFastViz" class="node-row" style="margin:1rem 0;">
+      <!-- JS populates -->
+    </div>
+    <div class="controls">
+      <button class="btn btn-primary" onclick="sfNext()">&#9654; Bước tiếp</button>
+      <button class="btn btn-outline" onclick="sfReset()">&#8634; Làm lại</button>
+    </div>
+    <div class="step-info" id="sfInfo">Nhấn <strong>&#9654; Bước tiếp</strong> để xem con trỏ di chuyển.</div>
+  </div>
+</section>
+
+<!-- ===================== D) MERGE DETAIL ===================== -->
+<section class="card">
+  <h2><span>&#128260;</span> Chi tiết quá trình Trộn (_tron)</h2>
+  <p>
+    Hàm <code>_tron()</code> so sánh phần tử đầu của hai danh sách đã sắp xếp, chọn phần tử nhỏ hơn đưa vào kết quả:
+  </p>
+
+  <div class="miniviz" id="mergeDetailViz">
+    <h4>&#127912; Minh họa trộn hai danh sách đã sắp xếp</h4>
+    <div id="mergeDetailContent">
+      <!-- JS populates -->
+    </div>
+    <div class="controls">
+      <button class="btn btn-primary" onclick="mdNext()">&#9654; Bước tiếp</button>
+      <button class="btn btn-outline" onclick="mdReset()">&#8634; Làm lại</button>
+    </div>
+    <div class="step-info" id="mdInfo">Nhấn <strong>&#9654; Bước tiếp</strong> để xem quá trình trộn.</div>
+  </div>
+</section>
+
+<!-- ===================== E) CODE ===================== -->
+<section class="card">
+  <h2><span>&#128187;</span> Mã nguồn với giải thích</h2>
+
+  <h3>Hàm chính: sap_xep_tron()</h3>
+  <div class="code-block">
+    <span class="code-label">Python</span>
+<span class="kw">def</span> <span class="fn">sap_xep_tron</span>(<span class="pm">self</span>, <span class="pm">tieu_chi</span>=<span class="st">'gia_ban'</span>):
+    <span class="cm"># Danh sách rỗng hoặc 1 phần tử → không cần sắp xếp</span>
+    <span class="kw">if</span> <span class="pm">self</span>.head <span class="kw">is</span> <span class="kw">None</span> <span class="kw">or</span> <span class="pm">self</span>.head.next <span class="kw">is</span> <span class="kw">None</span>:
+        <span class="kw">return</span>
+
+    <span class="cm"># Bước 1: Chia đôi danh sách (con trỏ nhanh/chậm)</span>
+    <span class="pm">nua_dau</span>, <span class="pm">nua_sau</span> = <span class="pm">self</span>.<span class="fn">_chia_doi</span>()
+
+    <span class="cm"># Bước 2: Sắp xếp đệ quy từng nửa</span>
+    <span class="pm">ds_nua_dau</span> = <span class="fn">DoublyLinkedList</span>()
+    <span class="pm">ds_nua_dau</span>.head = <span class="pm">nua_dau</span>
+    <span class="pm">ds_nua_sau</span> = <span class="fn">DoublyLinkedList</span>()
+    <span class="pm">ds_nua_sau</span>.head = <span class="pm">nua_sau</span>
+    <span class="pm">ds_nua_dau</span>.<span class="fn">sap_xep_tron</span>(<span class="pm">tieu_chi</span>)   <span class="cm"># Đệ quy nửa đầu</span>
+    <span class="pm">ds_nua_sau</span>.<span class="fn">sap_xep_tron</span>(<span class="pm">tieu_chi</span>)   <span class="cm"># Đệ quy nửa sau</span>
+
+    <span class="cm"># Bước 3: Trộn hai nửa đã sắp xếp</span>
+    <span class="pm">self</span>.<span class="fn">_tron</span>(<span class="pm">ds_nua_dau</span>, <span class="pm">ds_nua_sau</span>, <span class="pm">tieu_chi</span>)
+  </div>
+
+  <h3>Hàm chia đôi: _chia_doi()</h3>
+  <div class="code-block">
+    <span class="code-label">Python</span>
+<span class="kw">def</span> <span class="fn">_chia_doi</span>(<span class="pm">self</span>):
+    <span class="pm">con_tro_cham</span> = <span class="pm">self</span>.head       <span class="cm"># Di chuyển 1 bước</span>
+    <span class="pm">con_tro_nhanh</span> = <span class="pm">self</span>.head      <span class="cm"># Di chuyển 2 bước</span>
+    <span class="kw">while</span> <span class="pm">con_tro_nhanh</span>.next <span class="kw">and</span> <span class="pm">con_tro_nhanh</span>.next.next:
+        <span class="pm">con_tro_cham</span> = <span class="pm">con_tro_cham</span>.next
+        <span class="pm">con_tro_nhanh</span> = <span class="pm">con_tro_nhanh</span>.next.next
+    <span class="pm">nua_dau</span> = <span class="pm">self</span>.head
+    <span class="pm">nua_sau</span> = <span class="pm">con_tro_cham</span>.next
+    <span class="pm">con_tro_cham</span>.next = <span class="kw">None</span>       <span class="cm"># Cắt đôi danh sách</span>
+    <span class="kw">return</span> <span class="pm">nua_dau</span>, <span class="pm">nua_sau</span>
+  </div>
+
+  <h3>Hàm trộn: _tron()</h3>
+  <div class="code-block">
+    <span class="code-label">Python</span>
+<span class="kw">def</span> <span class="fn">_tron</span>(<span class="pm">self</span>, <span class="pm">ds_a</span>, <span class="pm">ds_b</span>, <span class="pm">tieu_chi</span>):
+    <span class="pm">node_tam</span> = <span class="fn">Node</span>(<span class="kw">None</span>)          <span class="cm"># Node tạm</span>
+    <span class="pm">hien_tai</span> = <span class="pm">node_tam</span>
+    <span class="pm">node_a</span> = <span class="pm">ds_a</span>.head
+    <span class="pm">node_b</span> = <span class="pm">ds_b</span>.head
+    <span class="kw">while</span> <span class="pm">node_a</span> <span class="kw">and</span> <span class="pm">node_b</span>:
+        <span class="pm">gia_tri_a</span> = <span class="pm">self</span>.<span class="fn">_lay_gia_tri</span>(<span class="pm">node_a</span>.data, <span class="pm">tieu_chi</span>)
+        <span class="pm">gia_tri_b</span> = <span class="pm">self</span>.<span class="fn">_lay_gia_tri</span>(<span class="pm">node_b</span>.data, <span class="pm">tieu_chi</span>)
+        <span class="kw">if</span> <span class="pm">gia_tri_a</span> <span class="op">&lt;=</span> <span class="pm">gia_tri_b</span>:    <span class="cm"># So sánh hai Node đầu</span>
+            <span class="pm">hien_tai</span>.next = <span class="pm">node_a</span>
+            <span class="pm">node_a</span>.truoc = <span class="pm">hien_tai</span>
+            <span class="pm">node_a</span> = <span class="pm">node_a</span>.next
+        <span class="kw">else</span>:
+            <span class="pm">hien_tai</span>.next = <span class="pm">node_b</span>
+            <span class="pm">node_b</span>.truoc = <span class="pm">hien_tai</span>
+            <span class="pm">node_b</span> = <span class="pm">node_b</span>.next
+        <span class="pm">hien_tai</span> = <span class="pm">hien_tai</span>.next
+    <span class="cm"># Nối phần còn lại</span>
+    <span class="kw">if</span> <span class="pm">node_a</span>:
+        <span class="pm">hien_tai</span>.next = <span class="pm">node_a</span>
+        <span class="pm">node_a</span>.truoc = <span class="pm">hien_tai</span>
+    <span class="kw">if</span> <span class="pm">node_b</span>:
+        <span class="pm">hien_tai</span>.next = <span class="pm">node_b</span>
+        <span class="pm">node_b</span>.truoc = <span class="pm">hien_tai</span>
+    <span class="pm">self</span>.head = <span class="pm">node_tam</span>.next
+    <span class="kw">if</span> <span class="pm">self</span>.head:
+        <span class="pm">self</span>.head.truoc = <span class="kw">None</span>
+  </div>
+</section>
+
+<!-- ===================== F) COMPLEXITY ===================== -->
+<section class="card">
+  <h2><span>&#128200;</span> Phân tích độ phức tạp O(n log n)</h2>
+  <p>Mỗi mức của cây đệ quy xử lý <strong>tổng cộng n phần tử</strong>. Số mức là <strong>log&#8322;n</strong>. Do đó tổng = n &times; log n.</p>
+
+  <div class="rec-tree" id="complexityTree">
+    <!-- JS populates -->
+  </div>
+
+  <table class="complexity-table">
+    <tr><th>Mức</th><th>Kích thước mỗi bài toán</th><th>Số bài toán</th><th>Tổng công việc</th></tr>
+    <tr><td>0</td><td>n</td><td>1</td><td>n</td></tr>
+    <tr><td>1</td><td>n/2</td><td>2</td><td>n</td></tr>
+    <tr><td>2</td><td>n/4</td><td>4</td><td>n</td></tr>
+    <tr><td>...</td><td>...</td><td>...</td><td>...</td></tr>
+    <tr><td>log n</td><td>1</td><td>n</td><td>n</td></tr>
+    <tr class="highlight-row"><td colspan="3"><strong>Tổng cộng</strong></td><td><strong>n &times; log n = O(n log n)</strong></td></tr>
+  </table>
+
+  <h3>&#128640; So sánh với các thuật toán khác trên Linked List</h3>
+  <table class="complexity-table">
+    <tr><th>Thuật toán</th><th>Tốt nhất</th><th>Trung bình</th><th>Xấu nhất</th><th>Stable?</th><th>Space</th></tr>
+    <tr style="background:#e8f5e9;"><td><strong>Merge Sort</strong></td><td>O(n log n)</td><td>O(n log n)</td><td>O(n log n)</td><td>&#10004;</td><td>O(1)</td></tr>
+    <tr><td>Quick Sort</td><td>O(n log n)</td><td>O(n log n)</td><td>O(n&sup2;)</td><td>&#10008;</td><td>O(log n)</td></tr>
+    <tr><td>Insertion Sort</td><td>O(n)</td><td>O(n&sup2;)</td><td>O(n&sup2;)</td><td>&#10004;</td><td>O(1)</td></tr>
+    <tr><td>Bubble Sort</td><td>O(n)</td><td>O(n&sup2;)</td><td>O(n&sup2;)</td><td>&#10004;</td><td>O(1)</td></tr>
+  </table>
+</section>
+
+</div><!-- /container -->
+
+<script>
+// ===========================
+// DATA
+// ===========================
+const PRODUCTS = [
+  { name: 'SP1', gia: 8000 },
+  { name: 'SP2', gia: 132000 },
+  { name: 'SP3', gia: 47250 },
+  { name: 'SP4', gia: 230000 },
+  { name: 'SP5', gia: 86400 },
+  { name: 'SP6', gia: 57750 },
+  { name: 'SP7', gia: 104500 }
+];
+
+function fmt(v) {
+  return v.toLocaleString('vi-VN') + 'đ';
+}
+
+// ===========================
+// MAIN VISUALIZATION
+// ===========================
+let currentPhase = 'divide';
+let autoTimer = null;
+
+// --- Divide Phase Steps ---
+function buildDivideSteps() {
+  const steps = [];
+  const vals = PRODUCTS.map(p => p.gia);
+
+  // Step 0: show original list
+  steps.push({
+    desc: 'Danh sách ban đầu (chưa sắp xếp theo giá_ban). Chúng ta sẽ dùng Merge Sort để sắp xếp.',
+    rows: [{ nodes: vals.map((v,i)=>({v, cls:'node-default'})), label: 'Danh sách gốc' }],
+    highlight: null
+  });
+
+  // Simulate merge sort divide steps
+  // We'll show the fast/slow pointer finding middle, then split
+  // Level 0: [8k, 132k, 47k, 230k, 86k, 57k, 104k]
+  // slow at index 3 (230k), split into [8k,132k,47k,230k] and [86k,57k,104k]
+
+  // Show fast/slow pointer movement on full list
+  steps.push({
+    desc: 'Kỹ thuật <strong>con trỏ nhanh/chậm</strong>: cả hai bắt đầu từ đầu danh sách.',
+    rows: [{ nodes: vals.map((v,i)=>({v, cls:'node-default', slow: i===0, fast: i===0})), label: 'Bước 0: con_tro_cham & con_tro_nhanh ở đầu' }],
+    highlight: null
+  });
+
+  steps.push({
+    desc: 'con_tro_cham &#128036; di chuyển 1 bước &rarr; SP2. con_tro_nhanh &#128007; di chuyển 2 bước &rarr; SP3.',
+    rows: [{ nodes: vals.map((v,i)=>({v, cls:'node-default', slow: i===1, fast: i===2})), label: 'Bước 1: slow=SP2, fast=SP3' }],
+    highlight: null
+  });
+
+  steps.push({
+    desc: 'con_tro_cham &#128036; di chuyển 1 bước &rarr; SP3. con_tro_nhanh &#128007; di chuyển 2 bước &rarr; SP5.',
+    rows: [{ nodes: vals.map((v,i)=>({v, cls:'node-default', slow: i===2, fast: i===4})), label: 'Bước 2: slow=SP3, fast=SP5' }],
+    highlight: null
+  });
+
+  steps.push({
+    desc: 'con_tro_cham &#128036; di chuyển 1 bước &rarr; SP4. con_tro_nhanh &#128007; di chuyển 2 bước &rarr; SP7 (vượt qua cuối). <strong>con_tro_cham đang ở giữa!</strong>',
+    rows: [{ nodes: vals.map((v,i)=>({v, cls:'node-default', slow: i===3, fast: i===6})), label: 'Bước 3: slow=SP4 (GIỮA!), fast=SP7' }],
+    highlight: null
+  });
+
+  steps.push({
+    desc: 'Tìm thấy giữa tại <strong>SP4 (230,000đ)</strong>. Cắt đôi danh sách thành hai nửa!',
+    rows: [
+      { nodes: vals.slice(0,4).map((v,i)=>({v, cls:'node-divided'})), label: 'Nửa đầu (4 phần tử)', labelCls: 'badge-divide' },
+      { nodes: vals.slice(4).map((v,i)=>({v, cls:'node-divided'})), label: 'Nửa sau (3 phần tử)', labelCls: 'badge-divide' }
+    ],
+    highlight: null
+  });
+
+  // Continue dividing first half: [8k, 132k, 47k, 230k]
+  const firstHalf = vals.slice(0,4);
+  const secondHalf = vals.slice(4);
+  // Find middle of first half: slow goes to index 1 (132k)
+  steps.push({
+    desc: 'Tiếp tục chia <strong>Nửa đầu</strong> [8,000 &hellip; 230,000]. Con trỏ nhanh/chậm tìm giữa tại <strong>SP2 (132,000đ)</strong>.',
+    rows: [
+      { nodes: firstHalf.map((v,i)=>({v, cls: i<=1?'node-default':'node-default', slow: i===1, fast: i===2})), label: 'Nửa đầu - tìm giữa' },
+      { nodes: secondHalf.map((v)=>({v, cls:'node-default'})), label: 'Nửa sau (chờ)' }
+    ],
+    highlight: null
+  });
+
+  steps.push({
+    desc: 'Chia Nửa đầu thành [8,000, 132,000] và [47,250, 230,000].',
+    rows: [
+      { nodes: firstHalf.slice(0,2).map((v)=>({v, cls:'node-divided'})), label: 'Nửa đầu-1', labelCls: 'badge-divide' },
+      { nodes: firstHalf.slice(2).map((v)=>({v, cls:'node-divided'})), label: 'Nửa đầu-2', labelCls: 'badge-divide' },
+      { nodes: secondHalf.map((v)=>({v, cls:'node-default'})), label: 'Nửa sau (chờ)' }
+    ],
+    highlight: null
+  });
+
+  // Divide [8k, 132k] and [47k, 230k] - base cases
+  steps.push({
+    desc: 'Chia tiếp [8,000, 132,000] thành hai phần tử đơn &rarr; <strong>Trường hợp cơ sở</strong> (1 phần tử, đã sắp xếp!).',
+    rows: [
+      { nodes: [{v:8000, cls:'node-sorted'}], label: 'SP1 ✓' },
+      { nodes: [{v:132000, cls:'node-sorted'}], label: 'SP2 ✓' },
+      { nodes: firstHalf.slice(2).map((v)=>({v, cls:'node-default'})), label: '[47,250, 230,000]' },
+      { nodes: secondHalf.map((v)=>({v, cls:'node-default'})), label: 'Nửa sau (chờ)' }
+    ],
+    highlight: null
+  });
+
+  steps.push({
+    desc: 'Chia tiếp [47,250, 230,000] thành hai phần tử đơn.',
+    rows: [
+      { nodes: [{v:8000, cls:'node-sorted'}], label: 'SP1 ✓' },
+      { nodes: [{v:132000, cls:'node-sorted'}], label: 'SP2 ✓' },
+      { nodes: [{v:47250, cls:'node-sorted'}], label: 'SP3 ✓' },
+      { nodes: [{v:230000, cls:'node-sorted'}], label: 'SP4 ✓' },
+      { nodes: secondHalf.map((v)=>({v, cls:'node-default'})), label: 'Nửa sau (chờ)' }
+    ],
+    highlight: null
+  });
+
+  // Divide second half: [86k, 57k, 104k]
+  steps.push({
+    desc: 'Bây giờ chia <strong>Nửa sau</strong> [86,400, 57,750, 104,500]. Con trỏ nhanh/chậm tìm giữa tại <strong>SP5 (86,400đ)</strong>.',
+    rows: [
+      { nodes: [{v:8000, cls:'node-sorted'},{v:132000, cls:'node-sorted'},{v:47250, cls:'node-sorted'},{v:230000, cls:'node-sorted'}], label: 'Nửa đầu đã chia xong' },
+      { nodes: secondHalf.map((v,i)=>({v, cls:'node-default', slow: i===0, fast: i===1})), label: 'Nửa sau - tìm giữa' }
+    ],
+    highlight: null
+  });
+
+  steps.push({
+    desc: 'Chia Nửa sau thành [86,400] và [57,750, 104,500].',
+    rows: [
+      { nodes: [{v:8000, cls:'node-sorted'},{v:132000, cls:'node-sorted'},{v:47250, cls:'node-sorted'},{v:230000, cls:'node-sorted'}], label: 'Nửa đầu đã chia xong' },
+      { nodes: [{v:86400, cls:'node-sorted'}], label: 'SP5 ✓' },
+      { nodes: [{v:57750, cls:'node-default'},{v:104500, cls:'node-default'}], label: '[57,750, 104,500]' }
+    ],
+    highlight: null
+  });
+
+  steps.push({
+    desc: 'Chia tiếp [57,750, 104,500] thành hai phần tử đơn. <strong>Giai đoạn CHIA hoàn thành!</strong>',
+    rows: [
+      { nodes: [{v:8000, cls:'node-sorted'},{v:132000, cls:'node-sorted'},{v:47250, cls:'node-sorted'},{v:230000, cls:'node-sorted'},{v:86400, cls:'node-sorted'},{v:57750, cls:'node-sorted'},{v:104500, cls:'node-sorted'}], label: 'Tất cả phần tử đơn - Sẵn sàng trộn!' }
+    ],
+    highlight: null
+  });
+
+  return steps;
+}
+
+// --- Merge Phase Steps ---
+function buildMergeSteps() {
+  const steps = [];
+  const vals = PRODUCTS.map(p => p.gia);
+
+  // Step 0: All single elements
+  steps.push({
+    desc: 'Bắt đầu giai đoạn <strong>TRỘN</strong>. Mỗi phần tử đơn đã là danh sách sắp xếp.',
+    rows: [{ nodes: vals.map(v=>({v, cls:'node-sorted'})), label: '7 phần tử đơn' }],
+    highlight: null
+  });
+
+  // Merge [8000] + [132000] → [8000, 132000]
+  steps.push({
+    desc: 'Trộn <strong>[8,000đ]</strong> và <strong>[132,000đ]</strong>: 8,000 &le; 132,000 &rarr; chọn 8,000 trước.',
+    rows: [
+      { nodes: [{v:8000, cls:'node-compare'},{v:132000, cls:'node-compare'}], label: 'So sánh' },
+      { nodes: [{v:8000, cls:'node-selected'},{v:132000, cls:'node-default'}], label: 'Kết quả trộn' }
+    ],
+    highlight: null
+  });
+
+  steps.push({
+    desc: '8,000 đã chọn, tiếp theo 132,000 &rarr; chọn 132,000. Kết quả: <strong>[8,000, 132,000]</strong>',
+    rows: [
+      { nodes: [{v:8000, cls:'node-selected'},{v:132000, cls:'node-selected'}], label: 'Trộn xong: [8,000, 132,000]' }
+    ],
+    highlight: null
+  });
+
+  // Merge [47250] + [230000] → [47250, 230000]
+  steps.push({
+    desc: 'Trộn <strong>[47,250đ]</strong> và <strong>[230,000đ]</strong>: 47,250 &le; 230,000 &rarr; chọn 47,250 trước.',
+    rows: [
+      { nodes: [{v:47250, cls:'node-compare'},{v:230000, cls:'node-compare'}], label: 'So sánh' },
+      { nodes: [{v:8000, cls:'node-selected'},{v:132000, cls:'node-selected'}], label: '[8,000, 132,000]' },
+    ],
+    highlight: null
+  });
+
+  steps.push({
+    desc: 'Kết quả trộn: <strong>[47,250, 230,000]</strong>',
+    rows: [
+      { nodes: [{v:8000, cls:'node-selected'},{v:132000, cls:'node-selected'}], label: '[8,000, 132,000]' },
+      { nodes: [{v:47250, cls:'node-selected'},{v:230000, cls:'node-selected'}], label: '[47,250, 230,000]' },
+    ],
+    highlight: null
+  });
+
+  // Merge [57750] + [104500] → [57750, 104500]
+  steps.push({
+    desc: 'Trộn <strong>[57,750đ]</strong> và <strong>[104,500đ]</strong>: 57,750 &le; 104,500.',
+    rows: [
+      { nodes: [{v:8000, cls:'node-selected'},{v:132000, cls:'node-selected'}], label: '[8,000, 132,000]' },
+      { nodes: [{v:47250, cls:'node-selected'},{v:230000, cls:'node-selected'}], label: '[47,250, 230,000]' },
+      { nodes: [{v:57750, cls:'node-compare'},{v:104500, cls:'node-compare'}], label: 'So sánh' },
+    ],
+    highlight: null
+  });
+
+  steps.push({
+    desc: 'Kết quả trộn: <strong>[57,750, 104,500]</strong>. Còn lại [86,400] đơn.',
+    rows: [
+      { nodes: [{v:8000, cls:'node-selected'},{v:132000, cls:'node-selected'}], label: '[8,000, 132,000]' },
+      { nodes: [{v:47250, cls:'node-selected'},{v:230000, cls:'node-selected'}], label: '[47,250, 230,000]' },
+      { nodes: [{v:86400, cls:'node-sorted'}], label: '[86,400]' },
+      { nodes: [{v:57750, cls:'node-selected'},{v:104500, cls:'node-selected'}], label: '[57,750, 104,500]' },
+    ],
+    highlight: null
+  });
+
+  // Now merge [8k, 132k] + [47k, 230k] → [8k, 47k, 132k, 230k]
+  steps.push({
+    desc: 'Trộn <strong>[8,000, 132,000]</strong> và <strong>[47,250, 230,000]</strong>: So sánh 8,000 vs 47,250 &rarr; chọn 8,000.',
+    rows: [
+      { nodes: [{v:8000, cls:'node-compare'},{v:132000, cls:'node-default'}], label: 'List A' },
+      { nodes: [{v:47250, cls:'node-compare'},{v:230000, cls:'node-default'}], label: 'List B' },
+      { nodes: [{v:8000, cls:'node-selected'}], label: 'Kết quả' },
+    ],
+    highlight: null
+  });
+
+  steps.push({
+    desc: 'So sánh 132,000 vs 47,250 &rarr; 47,250 nhỏ hơn, chọn 47,250.',
+    rows: [
+      { nodes: [{v:132000, cls:'node-compare'}], label: 'List A (còn)' },
+      { nodes: [{v:47250, cls:'node-compare'},{v:230000, cls:'node-default'}], label: 'List B' },
+      { nodes: [{v:8000, cls:'node-selected'},{v:47250, cls:'node-selected'}], label: 'Kết quả' },
+    ],
+    highlight: null
+  });
+
+  steps.push({
+    desc: 'So sánh 132,000 vs 230,000 &rarr; 132,000 nhỏ hơn, chọn 132,000.',
+    rows: [
+      { nodes: [{v:132000, cls:'node-compare'}], label: 'List A (còn)' },
+      { nodes: [{v:230000, cls:'node-default'}], label: 'List B (còn)' },
+      { nodes: [{v:8000, cls:'node-selected'},{v:47250, cls:'node-selected'},{v:132000, cls:'node-selected'}], label: 'Kết quả' },
+    ],
+    highlight: null
+  });
+
+  steps.push({
+    desc: 'List A hết, nối phần còn lại của List B. Kết quả: <strong>[8,000, 47,250, 132,000, 230,000]</strong>',
+    rows: [
+      { nodes: [{v:8000, cls:'node-selected'},{v:47250, cls:'node-selected'},{v:132000, cls:'node-selected'},{v:230000, cls:'node-selected'}], label: 'Nửa đầu sắp xếp xong! ✓' },
+      { nodes: [{v:86400, cls:'node-sorted'}], label: '[86,400]' },
+      { nodes: [{v:57750, cls:'node-selected'},{v:104500, cls:'node-selected'}], label: '[57,750, 104,500]' },
+    ],
+    highlight: null
+  });
+
+  // Merge [86400] + [57750, 104500] → [57750, 86400, 104500]
+  steps.push({
+    desc: 'Trộn <strong>[86,400]</strong> và <strong>[57,750, 104,500]</strong>: So sánh 86,400 vs 57,750 &rarr; chọn 57,750.',
+    rows: [
+      { nodes: [{v:8000, cls:'node-selected'},{v:47250, cls:'node-selected'},{v:132000, cls:'node-selected'},{v:230000, cls:'node-selected'}], label: 'Nửa đầu ✓' },
+      { nodes: [{v:86400, cls:'node-compare'}], label: 'List A' },
+      { nodes: [{v:57750, cls:'node-compare'},{v:104500, cls:'node-default'}], label: 'List B' },
+      { nodes: [{v:57750, cls:'node-selected'}], label: 'Kết quả' },
+    ],
+    highlight: null
+  });
+
+  steps.push({
+    desc: 'So sánh 86,400 vs 104,500 &rarr; chọn 86,400. Sau đó nối 104,500. Kết quả: <strong>[57,750, 86,400, 104,500]</strong>',
+    rows: [
+      { nodes: [{v:8000, cls:'node-selected'},{v:47250, cls:'node-selected'},{v:132000, cls:'node-selected'},{v:230000, cls:'node-selected'}], label: 'Nửa đầu ✓' },
+      { nodes: [{v:57750, cls:'node-selected'},{v:86400, cls:'node-selected'},{v:104500, cls:'node-selected'}], label: 'Nửa sau sắp xếp xong! ✓' },
+    ],
+    highlight: null
+  });
+
+  // Final merge: [8k, 47k, 132k, 230k] + [57k, 86k, 104k]
+  steps.push({
+    desc: '<strong>Trộn cuối cùng!</strong> So sánh 8,000 vs 57,750 &rarr; chọn 8,000.',
+    rows: [
+      { nodes: [{v:8000, cls:'node-compare'},{v:47250, cls:'node-default'},{v:132000, cls:'node-default'},{v:230000, cls:'node-default'}], label: 'List A' },
+      { nodes: [{v:57750, cls:'node-compare'},{v:86400, cls:'node-default'},{v:104500, cls:'node-default'}], label: 'List B' },
+      { nodes: [{v:8000, cls:'node-selected'}], label: 'Kết quả' },
+    ],
+    highlight: null
+  });
+
+  steps.push({
+    desc: 'So sánh 47,250 vs 57,750 &rarr; chọn 47,250.',
+    rows: [
+      { nodes: [{v:47250, cls:'node-compare'},{v:132000, cls:'node-default'},{v:230000, cls:'node-default'}], label: 'List A (còn)' },
+      { nodes: [{v:57750, cls:'node-compare'},{v:86400, cls:'node-default'},{v:104500, cls:'node-default'}], label: 'List B' },
+      { nodes: [{v:8000, cls:'node-selected'},{v:47250, cls:'node-selected'}], label: 'Kết quả' },
+    ],
+    highlight: null
+  });
+
+  steps.push({
+    desc: 'So sánh 132,000 vs 57,750 &rarr; chọn 57,750.',
+    rows: [
+      { nodes: [{v:132000, cls:'node-compare'},{v:230000, cls:'node-default'}], label: 'List A (còn)' },
+      { nodes: [{v:57750, cls:'node-compare'},{v:86400, cls:'node-default'},{v:104500, cls:'node-default'}], label: 'List B' },
+      { nodes: [{v:8000, cls:'node-selected'},{v:47250, cls:'node-selected'},{v:57750, cls:'node-selected'}], label: 'Kết quả' },
+    ],
+    highlight: null
+  });
+
+  steps.push({
+    desc: 'So sánh 132,000 vs 86,400 &rarr; chọn 86,400.',
+    rows: [
+      { nodes: [{v:132000, cls:'node-compare'},{v:230000, cls:'node-default'}], label: 'List A (còn)' },
+      { nodes: [{v:86400, cls:'node-compare'},{v:104500, cls:'node-default'}], label: 'List B (còn)' },
+      { nodes: [{v:8000, cls:'node-selected'},{v:47250, cls:'node-selected'},{v:57750, cls:'node-selected'},{v:86400, cls:'node-selected'}], label: 'Kết quả' },
+    ],
+    highlight: null
+  });
+
+  steps.push({
+    desc: 'So sánh 132,000 vs 104,500 &rarr; chọn 104,500.',
+    rows: [
+      { nodes: [{v:132000, cls:'node-compare'},{v:230000, cls:'node-default'}], label: 'List A (còn)' },
+      { nodes: [{v:104500, cls:'node-compare'}], label: 'List B (còn)' },
+      { nodes: [{v:8000, cls:'node-selected'},{v:47250, cls:'node-selected'},{v:57750, cls:'node-selected'},{v:86400, cls:'node-selected'},{v:104500, cls:'node-selected'}], label: 'Kết quả' },
+    ],
+    highlight: null
+  });
+
+  steps.push({
+    desc: 'So sánh 132,000 vs (List B hết) &rarr; chọn 132,000.',
+    rows: [
+      { nodes: [{v:132000, cls:'node-compare'},{v:230000, cls:'node-default'}], label: 'List A (còn)' },
+      { nodes: [], label: 'List B hết!' },
+      { nodes: [{v:8000, cls:'node-selected'},{v:47250, cls:'node-selected'},{v:57750, cls:'node-selected'},{v:86400, cls:'node-selected'},{v:104500, cls:'node-selected'},{v:132000, cls:'node-selected'}], label: 'Kết quả' },
+    ],
+    highlight: null
+  });
+
+  steps.push({
+    desc: 'Nối phần còn lại: 230,000. <strong>Sắp xếp hoàn thành!</strong> 🎉',
+    rows: [
+      { nodes: [{v:8000, cls:'node-sorted'},{v:47250, cls:'node-sorted'},{v:57750, cls:'node-sorted'},{v:86400, cls:'node-sorted'},{v:104500, cls:'node-sorted'},{v:132000, cls:'node-sorted'},{v:230000, cls:'node-sorted'}], label: '✅ Kết quả cuối cùng: danh sách đã sắp xếp!' }
+    ],
+    highlight: null
+  });
+
+  return steps;
+}
+
+// --- Recursion Phase Steps ---
+function buildRecurSteps() {
+  const steps = [];
+  const vals = PRODUCTS.map(p => p.gia);
+
+  steps.push({
+    desc: 'Cây đệ quy của Merge Sort. Mỗi lần gọi đệ quy chia bài toán thành 2 nửa.',
+    tree: [
+      { level: 0, groups: [{ vals: vals.slice(0,7), hl: true }] },
+      { level: 1, groups: [{ vals: vals.slice(0,4), hl: false }, { vals: vals.slice(4), hl: false }] },
+      { level: 2, groups: [{ vals: vals.slice(0,2), hl: false }, { vals: vals.slice(2,4), hl: false }, { vals: vals.slice(4,5), hl: false }, { vals: vals.slice(5), hl: false }] },
+      { level: 3, groups: [{ vals: [8000], hl: false }, { vals: [132000], hl: false }, { vals: [47250], hl: false }, { vals: [230000], hl: false }, { vals: [86400], hl: false }, { vals: [57750], hl: false }, { vals: [104500], hl: false }] },
+    ]
+  });
+
+  steps.push({
+    desc: 'Gọi <strong>sap_xep_tron()</strong> lần đầu với danh sách 7 phần tử. Ở mức 0, bài toán gốc chưa chia.',
+    tree: [
+      { level: 0, groups: [{ vals: vals.slice(0,7), hl: true }] },
+      { level: 1, groups: [{ vals: vals.slice(0,4), hl: false }, { vals: vals.slice(4), hl: false }] },
+      { level: 2, groups: [{ vals: vals.slice(0,2), hl: false }, { vals: vals.slice(2,4), hl: false }, { vals: vals.slice(4,5), hl: false }, { vals: vals.slice(5), hl: false }] },
+      { level: 3, groups: [{ vals: [8000], hl: false }, { vals: [132000], hl: false }, { vals: [47250], hl: false }, { vals: [230000], hl: false }, { vals: [86400], hl: false }, { vals: [57750], hl: false }, { vals: [104500], hl: false }] },
+    ]
+  });
+
+  steps.push({
+    desc: 'Đệ quy vào <strong>Nửa đầu</strong> [8,000 &hellip; 230,000] (mức 1, bên trái). Gọi sap_xep_tron() tiếp.',
+    tree: [
+      { level: 0, groups: [{ vals: vals.slice(0,7), hl: false }] },
+      { level: 1, groups: [{ vals: vals.slice(0,4), hl: true }, { vals: vals.slice(4), hl: false }] },
+      { level: 2, groups: [{ vals: vals.slice(0,2), hl: false }, { vals: vals.slice(2,4), hl: false }, { vals: vals.slice(4,5), hl: false }, { vals: vals.slice(5), hl: false }] },
+      { level: 3, groups: [{ vals: [8000], hl: false }, { vals: [132000], hl: false }, { vals: [47250], hl: false }, { vals: [230000], hl: false }, { vals: [86400], hl: false }, { vals: [57750], hl: false }, { vals: [104500], hl: false }] },
+    ]
+  });
+
+  steps.push({
+    desc: 'Tiếp tục đệ quy vào [8,000, 132,000] (mức 2, trái nhất). Chia thành 2 phần tử đơn &rarr; <strong>trường hợp cơ sở</strong>!',
+    tree: [
+      { level: 0, groups: [{ vals: vals.slice(0,7), hl: false }] },
+      { level: 1, groups: [{ vals: vals.slice(0,4), hl: false }, { vals: vals.slice(4), hl: false }] },
+      { level: 2, groups: [{ vals: vals.slice(0,2), hl: true }, { vals: vals.slice(2,4), hl: false }, { vals: vals.slice(4,5), hl: false }, { vals: vals.slice(5), hl: false }] },
+      { level: 3, groups: [{ vals: [8000], hl: true }, { vals: [132000], hl: true }, { vals: [47250], hl: false }, { vals: [230000], hl: false }, { vals: [86400], hl: false }, { vals: [57750], hl: false }, { vals: [104500], hl: false }] },
+    ]
+  });
+
+  steps.push({
+    desc: 'Phần tử đơn là <strong>trường hợp cơ sở</strong>: if head.next is None &rarr; return. Trộn ngược lên!',
+    tree: [
+      { level: 0, groups: [{ vals: vals.slice(0,7), hl: false }] },
+      { level: 1, groups: [{ vals: vals.slice(0,4), hl: false }, { vals: vals.slice(4), hl: false }] },
+      { level: 2, groups: [{ vals: vals.slice(0,2), hl: true }, { vals: vals.slice(2,4), hl: true }, { vals: vals.slice(4,5), hl: false }, { vals: vals.slice(5), hl: false }] },
+      { level: 3, groups: [{ vals: [8000], hl: true }, { vals: [132000], hl: true }, { vals: [47250], hl: true }, { vals: [230000], hl: true }, { vals: [86400], hl: false }, { vals: [57750], hl: false }, { vals: [104500], hl: false }] },
+    ]
+  });
+
+  steps.push({
+    desc: 'Toàn bộ cây đệ quy. Mỗi mức chia đôi bài toán. Tổng số mức = log&#8322;(7) &approx; 3. Tổng công việc mỗi mức = n = 7.',
+    tree: [
+      { level: 0, groups: [{ vals: vals.slice(0,7), hl: true }] },
+      { level: 1, groups: [{ vals: vals.slice(0,4), hl: true }, { vals: vals.slice(4), hl: true }] },
+      { level: 2, groups: [{ vals: vals.slice(0,2), hl: true }, { vals: vals.slice(2,4), hl: true }, { vals: vals.slice(4,5), hl: true }, { vals: vals.slice(5), hl: true }] },
+      { level: 3, groups: [{ vals: [8000], hl: true }, { vals: [132000], hl: true }, { vals: [47250], hl: true }, { vals: [230000], hl: true }, { vals: [86400], hl: true }, { vals: [57750], hl: true }, { vals: [104500], hl: true }] },
+    ]
+  });
+
+  return steps;
+}
+
+// State
+let divideSteps = buildDivideSteps();
+let recurSteps = buildRecurSteps();
+let mergeSteps = buildMergeSteps();
+let divideStep = 0, recurStep = 0, mergeStep = 0;
+
+function getCurrentSteps() {
+  if (currentPhase === 'divide') return divideSteps;
+  if (currentPhase === 'recur') return recurSteps;
+  return mergeSteps;
+}
+function getCurrentStepIndex() {
+  if (currentPhase === 'divide') return divideStep;
+  if (currentPhase === 'recur') return recurStep;
+  return mergeStep;
+}
+function setCurrentStepIndex(v) {
+  if (currentPhase === 'divide') divideStep = v;
+  else if (currentPhase === 'recur') recurStep = v;
+  else mergeStep = v;
+}
+
+function showPhase(phase) {
+  currentPhase = phase;
+  document.querySelectorAll('.phase-tab').forEach(t => {
+    t.className = 'phase-tab';
+  });
+  if (phase === 'divide') document.getElementById('tabDivide').className = 'phase-tab active-divide';
+  else if (phase === 'recur') document.getElementById('tabRecur').className = 'phase-tab active-current';
+  else document.getElementById('tabMerge').className = 'phase-tab active-merge';
+  renderCurrentStep();
+}
+
+function renderCurrentStep() {
+  const steps = getCurrentSteps();
+  const idx = getCurrentStepIndex();
+  const vizArea = document.getElementById('vizArea');
+  const stepInfo = document.getElementById('stepInfo');
+  const stepCounter = document.getElementById('stepCounter');
+  const progressFill = document.getElementById('progressFill');
+  const progressText = document.getElementById('progressText');
+
+  if (idx >= steps.length) {
+    stepInfo.innerHTML = '<strong>Hoàn thành!</strong> Thuật toán đã kết thúc. Nhấn <strong>Làm lại</strong> để xem lại.';
+    document.getElementById('btnNext').disabled = true;
+    return;
+  }
+  document.getElementById('btnNext').disabled = false;
+
+  const step = steps[idx];
+  let html = '';
+
+  if (step.tree) {
+    // Recursion tree visualization
+    html += '<div class="rec-tree">';
+    step.tree.forEach(level => {
+      html += '<div class="rec-level-row">';
+      html += '<span class="rec-level-label">Mức ' + level.level + '</span>';
+      html += '<div class="rec-level">';
+      level.groups.forEach(g => {
+        const cls = g.hl ? 'rec-group highlight' : 'rec-group';
+        const valsStr = g.vals.map(v => fmt(v)).join(' | ');
+        html += '<div class="' + cls + '">' + valsStr + '</div>';
+      });
+      html += '</div></div>';
+      if (level.level < step.tree.length - 1) {
+        html += '<div style="text-align:center;"><span class="rec-arrow-down">&#9660; &#9660;</span></div>';
+      }
+    });
+    html += '</div>';
+  } else if (step.rows) {
+    step.rows.forEach(row => {
+      html += '<div style="text-align:center;margin:0.3rem 0;">';
+      if (row.label) {
+        const lblCls = row.labelCls || 'badge-primary';
+        html += '<span class="badge ' + lblCls + '" style="margin-bottom:0.3rem;display:inline-block;">' + row.label + '</span><br>';
+      }
+      html += '<div class="node-row fade-in">';
+      row.nodes.forEach((node, ni) => {
+        let ptrHtml = '';
+        if (node.slow) ptrHtml += '<span class="pointer-label pointer-slow">&#128036; cham</span>';
+        if (node.fast) ptrHtml += '<span class="pointer-label pointer-fast">&#128007; nhanh</span>';
+
+        html += '<div class="node-box ' + node.cls + '" style="position:relative;">' + ptrHtml;
+        html += fmt(node.v);
+        html += '</div>';
+        if (ni < row.nodes.length - 1) {
+          html += '<span class="arrow-h">&harr;</span>';
+        }
+      });
+      html += '</div></div>';
+    });
+  }
+
+  vizArea.innerHTML = html;
+  stepInfo.innerHTML = step.desc;
+
+  const pct = Math.round(((idx + 1) / steps.length) * 100);
+  progressFill.style.width = pct + '%';
+  progressText.textContent = pct + '%';
+  stepCounter.textContent = 'Bước ' + (idx + 1) + ' / ' + steps.length;
+}
+
+function nextStep() {
+  const steps = getCurrentSteps();
+  let idx = getCurrentStepIndex();
+  if (idx < steps.length - 1) {
+    idx++;
+    setCurrentStepIndex(idx);
+    renderCurrentStep();
+  } else {
+    document.getElementById('btnNext').disabled = true;
+  }
+}
+
+function toggleAuto() {
+  const btn = document.getElementById('btnAuto');
+  if (autoTimer) {
+    clearInterval(autoTimer);
+    autoTimer = null;
+    btn.innerHTML = '&#9654; Tự động';
+    btn.className = 'btn btn-current';
+  } else {
+    btn.innerHTML = '&#9646;&#9646; Dừng';
+    btn.className = 'btn btn-divide';
+    autoTimer = setInterval(() => {
+      const steps = getCurrentSteps();
+      let idx = getCurrentStepIndex();
+      if (idx < steps.length - 1) {
+        nextStep();
+      } else {
+        clearInterval(autoTimer);
+        autoTimer = null;
+        btn.innerHTML = '&#9654; Tự động';
+        btn.className = 'btn btn-current';
+      }
+    }, 1500);
+  }
+}
+
+function resetViz() {
+  if (autoTimer) {
+    clearInterval(autoTimer);
+    autoTimer = null;
+    document.getElementById('btnAuto').innerHTML = '&#9654; Tự động';
+    document.getElementById('btnAuto').className = 'btn btn-current';
+  }
+  setCurrentStepIndex(0);
+  document.getElementById('btnNext').disabled = false;
+  renderCurrentStep();
+}
+
+// ===========================
+// SLOW/FAST POINTER MINI VIZ
+// ===========================
+const SF_DATA = PRODUCTS.map(p => p.gia);
+let sfStep = 0;
+
+function sfRender() {
+  const container = document.getElementById('slowFastViz');
+  const info = document.getElementById('sfInfo');
+
+  // Steps: slow/fast positions
+  const sfSteps = [
+    { slow: -1, fast: -1, desc: 'Khởi tạo: con_tro_cham và con_tro_nhanh đều ở đầu danh sách (SP1).' },
+    { slow: 0, fast: 0, desc: 'Bắt đầu: cả hai ở vị trí 0 (SP1). Bắt đầu vòng lặp while.' },
+    { slow: 1, fast: 2, desc: 'Lặp 1: &#128036; cham di chuyển 1 bước &rarr; SP2. &#128007; nhanh di chuyển 2 bước &rarr; SP3.' },
+    { slow: 2, fast: 4, desc: 'Lặp 2: &#128036; cham &rarr; SP3. &#128007; nhanh &rarr; SP5. fast.next.next vẫn tồn tại.' },
+    { slow: 3, fast: 6, desc: 'Lặp 3: &#128036; cham &rarr; SP4. &#128007; nhanh &rarr; SP7. fast.next = None &rarr; <strong>Dừng vòng lặp!</strong>' },
+    { slow: 3, fast: -2, desc: '<strong>Kết quả:</strong> con_tro_cham ở SP4 (230,000đ) = vị trí giữa! Cắt tại đây: nua_dau = [SP1&hellip;SP4], nua_sau = [SP5&hellip;SP7].' },
+  ];
+
+  if (sfStep >= sfSteps.length) {
+    info.innerHTML = '<strong>Hoàn thành!</strong> Đã tìm thấy giữa danh sách.';
+    return;
+  }
+
+  const s = sfSteps[sfStep];
+  let html = '';
+  SF_DATA.forEach((v, i) => {
+    let cls = 'node-default';
+    let ptr = '';
+    if (i === s.slow && s.slow >= 0) {
+      cls = 'node-slow';
+      ptr += '<span class="pointer-label pointer-slow">&#128036; cham</span>';
+    }
+    if (i === s.fast && s.fast >= 0) {
+      cls = 'node-fast';
+      ptr += '<span class="pointer-label pointer-fast">&#128007; nhanh</span>';
+    }
+    if (sfStep === sfSteps.length - 1 && i === 3) {
+      cls = 'node-active pulse';
+      ptr = '<span class="pointer-label pointer-current">GIỮA!</span>';
+    }
+
+    html += '<div class="node-box ' + cls + '" style="position:relative;">' + ptr + fmt(v) + '</div>';
+    if (i < SF_DATA.length - 1) html += '<span class="arrow-h">&harr;</span>';
+  });
+  container.innerHTML = html;
+  info.innerHTML = s.desc;
+}
+
+function sfNext() {
+  sfStep++;
+  sfRender();
+}
+
+function sfReset() {
+  sfStep = 0;
+  sfRender();
+}
+
+// ===========================
+// MERGE DETAIL MINI VIZ
+// ===========================
+let mdStep = 0;
+
+function mdRender() {
+  const container = document.getElementById('mergeDetailContent');
+  const info = document.getElementById('mdInfo');
+
+  // Merge [8000, 47250] and [57750, 86400]
+  const listA = [8000, 47250];
+  const listB = [57750, 86400];
+
+  const mdSteps = [
+    { aIdx: 0, bIdx: 0, result: [], desc: 'Hai danh sách đã sắp xếp sẵn sàng trộn. So sánh phần tử đầu: <strong>8,000 vs 57,750</strong>.' },
+    { aIdx: 1, bIdx: 0, result: [8000], desc: '8,000 &le; 57,750 &rarr; chọn 8,000. Di chuyển con trỏ A sang phải.' },
+    { aIdx: 1, bIdx: 1, result: [8000, 47250], desc: '47,250 &le; 57,750 &rarr; chọn 47,250. Di chuyển con trỏ A. <strong>List A hết!</strong>' },
+    { aIdx: -1, bIdx: 1, result: [8000, 47250, 57750], desc: 'List A hết, lấy phần còn lại của List B: chọn 57,750.' },
+    { aIdx: -1, bIdx: -1, result: [8000, 47250, 57750, 86400], desc: 'Nối 86,400. <strong>Kết quả trộn: [8,000, 47,250, 57,750, 86,400]</strong> ✓' },
+  ];
+
+  if (mdStep >= mdSteps.length) {
+    info.innerHTML = '<strong>Hoàn thành!</strong> Trộn thành công hai danh sách.';
+    return;
+  }
+
+  const s = mdSteps[mdStep];
+
+  let html = '<div class="merge-detail">';
+  // List A
+  html += '<div class="merge-list"><h5>List A (ds_nua_dau)</h5><div class="node-row">';
+  listA.forEach((v, i) => {
+    let cls = 'node-default';
+    if (i === s.aIdx && s.aIdx >= 0) cls = 'node-compare';
+    else if (i < (s.aIdx >= 0 ? s.aIdx : listA.length)) cls = 'node-selected';
+    else if (s.aIdx === -1) cls = 'node-selected';
+    html += '<div class="node-box ' + cls + '">' + fmt(v) + '</div>';
+    if (i < listA.length - 1) html += '<span class="arrow-h">&harr;</span>';
+  });
+  html += '</div></div>';
+
+  // Compare icon
+  html += '<div class="merge-compare-icon">&#8644;</div>';
+
+  // List B
+  html += '<div class="merge-list"><h5>List B (ds_nua_sau)</h5><div class="node-row">';
+  listB.forEach((v, i) => {
+    let cls = 'node-default';
+    if (i === s.bIdx && s.bIdx >= 0) cls = 'node-compare';
+    else if (i < (s.bIdx >= 0 ? s.bIdx : listB.length)) cls = 'node-selected';
+    else if (s.bIdx === -1) cls = 'node-selected';
+    html += '<div class="node-box ' + cls + '">' + fmt(v) + '</div>';
+    if (i < listB.length - 1) html += '<span class="arrow-h">&harr;</span>';
+  });
+  html += '</div></div>';
+  html += '</div>';
+
+  // Result
+  if (s.result.length > 0) {
+    html += '<div class="merge-result" style="margin-top:0.8rem;"><h5>&#10004; Kết quả trộn</h5><div class="node-row">';
+    s.result.forEach((v, i) => {
+      const cls = (i === s.result.length - 1 && mdStep > 0) ? 'node-selected' : 'node-sorted';
+      html += '<div class="node-box ' + cls + '">' + fmt(v) + '</div>';
+      if (i < s.result.length - 1) html += '<span class="arrow-h">&harr;</span>';
+    });
+    html += '</div></div>';
+  }
+
+  container.innerHTML = html;
+  info.innerHTML = s.desc;
+}
+
+function mdNext() {
+  mdStep++;
+  mdRender();
+}
+
+function mdReset() {
+  mdStep = 0;
+  mdRender();
+}
+
+// ===========================
+// COMPLEXITY TREE
+// ===========================
+function buildComplexityTree() {
+  const container = document.getElementById('complexityTree');
+  const vals = PRODUCTS.map(p => p.gia);
+  const levels = [
+    { level: 0, groups: [vals.slice(0,7)] },
+    { level: 1, groups: [vals.slice(0,4), vals.slice(4)] },
+    { level: 2, groups: [vals.slice(0,2), vals.slice(2,4), vals.slice(4,5), vals.slice(5)] },
+    { level: 3, groups: [[8000],[132000],[47250],[230000],[86400],[57750],[104500]] },
+  ];
+
+  let html = '';
+  levels.forEach((lev, li) => {
+    html += '<div class="rec-level-row">';
+    html += '<span class="rec-level-label">Mức ' + lev.level + (li === 0 ? ' (gốc)' : li === levels.length-1 ? ' (cơ sở)' : '') + '</span>';
+    html += '<div class="rec-level">';
+    lev.groups.forEach(g => {
+      const valsStr = g.map(v => fmt(v)).join(' | ');
+      html += '<div class="rec-group">' + valsStr + '</div>';
+    });
+    html += '</div></div>';
+    if (li < levels.length - 1) {
+      html += '<div style="text-align:center;"><span class="rec-arrow-down">&#9660; &#9660;</span></div>';
+    }
+  });
+  container.innerHTML = html;
+}
+
+// ===========================
+// INIT
+// ===========================
+document.addEventListener('DOMContentLoaded', () => {
+  renderCurrentStep();
+  sfRender();
+  mdRender();
+  buildComplexityTree();
+});
+</script>
+
+</body>
+</html>
